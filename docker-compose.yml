@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: fitness_db
+    environment:
+      POSTGRES_DB: fitness_center
+      POSTGRES_USER: fitness_user
+      POSTGRES_PASSWORD: fitness_password
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/01_schema.sql
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./backend
+    container_name: fitness_backend
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - db
+    ports:
+      - "4000:4000"
+
+  frontend:
+    build: ./frontend
+    container_name: fitness_frontend
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+volumes:
+  db_data:
